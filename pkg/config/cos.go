@@ -242,6 +242,20 @@ func initRancherdStage(config *HarvesterConfig, stage *yipSchema.Stage) error {
 		},
 	)
 
+	kubeAPIServerPolicy, err := generateAuditLogPolicyFile()
+	if err != nil {
+		return err
+	}
+	stage.Files = append(stage.Files,
+		yipSchema.File{
+			Path:        "/var/lib/rancher/rke2/audit/audit-policy.yaml",
+			Content:     kubeAPIServerPolicy,
+			Permissions: 0600,
+			Owner:       0,
+			Group:       0,
+		},
+	)
+
 	return nil
 }
 
@@ -531,4 +545,12 @@ func genBootstrapResources(config *HarvesterConfig) (map[string]string, error) {
 	}
 
 	return bootstrapConfs, nil
+}
+
+func generateAuditLogPolicyFile() (string, error) {
+	templBytes, err := templFS.ReadFile(filepath.Join(templateFolder, "rancherd-30-kube-apiserver-audit-policy.yaml"))
+	if err != nil {
+		return "", err
+	}
+	return string(templBytes), nil
 }

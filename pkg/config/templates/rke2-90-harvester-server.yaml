@@ -4,6 +4,15 @@ service-cidr: 10.53.0.0/16
 cluster-dns: 10.53.0.10
 tls-san:
   - {{ .Vip }}
+kube-apiserver-arg:
+  - audit-log-path=/var/log/kube-audit/audit-log.json
+  - audit-log-format=json
+  - audit-log-maxsize=50
+  - audit-policy-file=/var/lib/rancher/rke2/audit/audit-policy.yaml
+  - audit-log-maxage=3
+  - audit-log-maxbackup=3
+kube-apiserver-extra-mount:
+  - /var/lib/rancher/rke2/server/audit:/var/lib/rancher/rke2/server/audit
 {{- with $args :=  .GetKubeletArgs }}
 kubelet-arg:
 {{- range $arg := $args }}
